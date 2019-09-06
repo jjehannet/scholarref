@@ -1,0 +1,170 @@
+#!/bin/sh
+set -e
+
+version=1.0
+host="https://doi.org"
+
+show_help() {
+	echo "usage: ${0##*/} [OPTIONS] DOI1 [DOI2 ...]"
+	echo "will attempt to get a BibTeX citation from $host"
+	echo "If no DOIs are specified, this program will expect DOIs as stdin."
+	echo
+	echo "OPTIONS are one or more of the following:"
+	echo "   -h, --help          show this message"
+	echo "   -v, --version       show version and license information"
+	echo "   -V, --verbose       show verbose information"
+	echo "   -t, --tor-socks     use torsocks for HTTP requests"
+	echo "   -j, --full-journal  return full journal name in citation"
+	echo "   -a, --full-author   do not shorten author names"
+	echo "   -n, --no-newline    suppress trailing newline but prepend with newline"
+	echo "   -N, --notify        send desktop notification when complete"
+	echo "   --                  do not consider any following args as options"
+}
+
+show_version() {
+	echo "${0##*/} version $version"
+	echo "Licensed under the GNU Public License, v3+"
+	echo "written by Anders Damsgaard, anders@adamsgaard.dk"
+	echo "https://gitlab.com/admesg/dotfiles"
+}
+
+die() {
+	printf '%s\n' "$1" >&2
+	exit 1
+}
+
+format_bibtex_key() {
+	sed '/@/ s/_\([0-9]\)/\1/'
+}
+
+abbreviate_journal_name() {
+	sed '/journal = / {
+	s/Journal/J./
+	s/Geophysical/Geophys./
+	s/Research/Res./
+	s/Geophysical/Geophys./
+	s/Geophysics/Geophys./
+	s/Research/Res./
+	s/Letters/Lett./
+	s/Mechanics/Mech./
+	s/Glaciology/Glaciol./
+	s/Proceedings/Proc./
+	s/Royal/R./
+	s/Society/Soc./
+	s/Annals/Ann./
+	s/Resources/Resour./
+	s/Surface/Surf./
+	s/Processes/Proc./
+	s/National/Nat./
+	s/Computers/Comput./
+	s/Geotechnics/Geotech./
+	s/Academy/Acad./
+	s/Sciences/Sci./
+	s/Review/Rev./
+	s/Quaternary/Quat./
+	s/Physical/Phys./
+	s/Planetary/Planet./
+	s/Quarterly/Q./
+	s/Geological/Geol./
+	s/Statistical/Stat./
+	s/Applied/Appl./
+	s/Physics/Phys./
+	s/Communications/Commun./
+	s/Geoscience/Geosci./
+	s/Landforms/Land./
+	s/Science/Sci./
+	s/Annual/Ann./
+	s/International/Int./
+	s/Numerical/Numer./
+	s/Methods/Meth./
+	s/Geomechanics/Geomech./
+	s/Analytical/Anal./
+	s/ for / /
+	s/ of / /
+	s/ and / /
+	s/ in / /
+	}'
+}
+
+abbreviate_author_name() {
+	sed '/author = / { s/\([A-Z]\)[A-Za-z]* \([A-Z]\)/\1. \2/g }'
+}
+
+strip_doi() {
+	sed 's/^(http:\/\/|https:\/\/)?(dx\.)?(doi\.org\/)//'
+}
+
+get_citation() {
+	doi=$(echo "$1" | strip_doi)
+	url="$host/$1"
+	[ "$verbose" = 1 ] && echo "connecting to $url"
+	result=$($prefix curl --location \
+		--header "Accept: application/x-bibtex" \
+		--silent --show-error "$url")
+	echo "$result" | grep -q '<html>' && die 'no result found'
+	result="$(echo "$result" | format_bibtex_key)"
+	[ "$fulljournal" = 0 ] && result="$(echo "$result" | abbreviate_journal_name)"
+	[ "$fullauthor" = 0 ] && result="$(echo "$result" | abbreviate_author_name)"
+	result="$(echo "$result" | sed 's/\t/    /g' | grep -v '^    url' )"
+	if [ "$nonewline" = 1 ]; then
+		printf "\n%s" "$result"
+	else
+		echo "$result"
+	fi
+	[ "$notify" = 1 ] && notify-send "${0##*/}" "added: $(echo "$result" | cut -c-80)"
+	printf ''
+}
+
+verbose=0
+fulljournal=0
+fullauthor=0
+nonewline=0
+notify=0
+prefix=""
+while :; do
+	case "$1" in
+		-h|-\?|--help)
+			show_help
+			exit 0
+			;;
+		-v|--version)
+			show_version
+			exit 0
+			;;
+		-j|--full-journal)
+			fulljournal=1
+			;;
+		-a|--full-author)
+			fullauthor=1
+			;;
+		-n|--no-newline)
+			nonewline=1
+			;;
+		-N|--notify)
+			notify=1
+			;;
+		-V|--verbose)
+			verbose=1
+			;;
+		-t|--tor-socks)
+			prefix="torsocks"
+			;;
+		--) # end all options
+			shift
+			break
+			;;
+		-?*)
+			die 'Error: Unknown option specified'
+			;;
+		*)  # No more options
+			break
+	esac
+	shift
+done
+
+if [ $# -lt 1 ]; then
+	doi="$(cat)"
+	get_citation "$doi"
+else
+	get_citation "$@"
+fi

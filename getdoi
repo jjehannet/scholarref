@@ -1,0 +1,141 @@
+#!/bin/sh
+
+version=1.0
+host="http://api.crossref.org/works"
+
+show_help() {
+	echo "usage: ${0##*/} [OPTIONS] QUERY"
+	echo "will attempt to get the DOI from $host"
+	echo "where QUERY can consist of publication title, author, DOI, ORCID id,"
+	echo "or a PDF file. In case a file is specified, ${0##*/} will attempt to"
+	echo "extract the DOI from it."
+	echo "If no QUERY is specified, this program will expect a QUERY as stdin."
+	echo
+	echo "OPTIONS are one or more of the following:"
+	echo "   -h, --help          show this message"
+	echo "   -v, --version       show version and license information"
+	echo "   -V, --verbose       show verbose information"
+	echo "   -t, --tor-socks     use torsocks for HTTP requests"
+	echo "   -n, --notify        send result as desktop notification"
+	echo "   -N, --number NUM    return NUM results (default 1)"
+	echo "   -c,  --clip         paste DOI to clipboard (requires xclip)"
+	echo "   -o,  --open         open DOI as url in browser"
+	echo "   --                  do not consider any following args as options"
+}
+
+show_version() {
+	echo "${0##*/} version $version"
+	echo "Licensed under the GNU Public License, v3+"
+	echo "written by Anders Damsgaard, anders@adamsgaard.dk"
+	echo "https://gitlab.com/admesg/dotfiles"
+}
+
+die() {
+	printf '%s\n' "$1" >&2
+	exit 1
+}
+
+extract_dois() {
+	tr ',' '\n' | grep DOI | \
+		sed 's/.*DOI":"//' | sed 's/"}.*//' | sed 's|\\\/|/|g'
+}
+
+browser_open() {
+	if command -v xdg-open >/dev/null 2>&1; then
+		[ "$verbose" = 1 ] && echo "launching default browser"
+		xdg-open "$1"
+	elif command -v open >/dev/null 2>&1; then
+		[ "$verbose" = 1 ] && echo "launching default browser"
+		open "$1"
+	else
+		die 'Error: could not open a browser'
+	fi
+}
+
+get_doi_from_crossref() {
+	query="$(echo "$@" | sed 's/ /+/g')"
+	url="$host?rows=$number&select=DOI&query=$query"
+	[ "$verbose" = 1 ] && echo "connecting to $url"
+	result=$($prefix curl --header "Accept: application/json" \
+		--header "Content-Type: application/json" \
+		--silent --show-error \
+		--request GET "$url")
+	echo "$result" | extract_dois
+}
+
+get_doi_from_file() {
+	doi=$(pdfinfo "$1" | grep -io "doi.*") ||
+	doi=$(pdftotext "$1" 2>/dev/null - | grep -io "doi.*" -m 1 ) ||
+	die "Error: Could not extract DOI from file $doi"
+	doi=$(echo "$doi" | sed 's/[A-Za-z\.\/:]*//;s/[\.,]$//' |\
+		  sed 's/.*\(10\.\)/\1/' | cut -d' ' -f1 | sed 's/,//g')
+	echo "$doi"
+}
+
+get_doi() {
+	if [ -e "$1" ]; then
+		doi=$(get_doi_from_file "$1")
+	else
+		doi=$(get_doi_from_crossref "$@")
+	fi
+	echo "$doi"
+	[ "$clip" = 1 ] && echo "https://doi.org/${doi}" | \
+		xclip -selection clipboard
+	[ "$notify" = 1 ] && notify-send "$doi"
+	[ "$open" = 1 ] && browser_open "https://doi.org/${doi}"
+}
+
+verbose=0
+number=1
+clip=0
+open=0
+notify=0
+prefix=""
+while :; do
+	case "$1" in
+		-h|-\?|--help)
+			show_help
+			exit 0
+			;;
+		-v|--version)
+			show_version
+			exit 0
+			;;
+		-V|--verbose)
+			verbose=1
+			;;
+		-t|--tor-socks)
+			prefix="torsocks"
+			;;
+		-N|--number)
+			number="$2"
+			shift
+			;;
+		-n|--notify)
+			notify=1
+			;;
+		-c|--clip)
+			clip=1
+			;;
+		-o|--open)
+			open=1
+			;;
+		--) # end all options
+			shift
+			break
+			;;
+		-?*)
+			die 'Error: Unknown option specified'
+			;;
+		*)  # No more options
+			break
+	esac
+	shift
+done
+
+if [ $# -lt 1 ]; then
+	query="$(cat)"
+	get_doi "$query"
+else
+	get_doi "$@"
+fi
