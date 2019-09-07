@@ -2,29 +2,29 @@
 
 addref=0
 while :; do
-    case "$1" in
-        -a|--add)
-            addref=1
-            ;;
-        --) # end all options
-            shift
-            break
-            ;;
-        -?*)
-            die 'Error: Unknown option specified'
-            ;;
-        *)  # No more options
-            break
-    esac
-    shift
+	case "$1" in
+		-
+		-a|--add)
+			addref=1
+			;;
+		--) # end all options
+			shift
+			break
+			;;
+		-?*)
+			die 'Error: Unknown option specified'
+			;;
+		*)  # No more options
+			break
+	esac
+	shift
 done
 
 if [ "$addref" = 1 ]; then
-    getdoi "$@" | getref -n >> "$BIB"
-    key="$(grep '@.*{' "$BIB" | tail -n 1 | sed 's/.*{//;s/,$//')"
-    echo "Citation $key added to $BIB"
-    notify-send "${0##/*} Citation $key added"
+	getdoi "$@" | getref -n >> "$BIB"
+	key="$(grep '@.*{' "$BIB" | tail -n 1 | sed 's/.*{//;s/,$//')"
+	echo "Citation $key added to $BIB"
+	notify-send "${0##/*} Citation $key added"
 else
-    getdoi "$@" | getref -n
+	getdoi "$@" | getref -n
 fi
-exit 0
