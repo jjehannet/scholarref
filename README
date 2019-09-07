@@ -1,10 +1,14 @@
 # scholarref
 
-Tools to extract, fetch, and parse DOIs and BiBTeX bibliography references.
+POSIX shell tools to extract, fetch, and parse DOIs and BiBTeX bibliography
+references.
 
 - getdoi: extracts a DOI from a file or fetches it online from a search query
 - getref: get a BiBTeX entry from a DOI and parse it
 - scholarref: combine getref and getdoi for a BiBTeX entry from a search query
+
+Use locally or run `make install` to install under `/usr/local/bin`. Run
+`make uninstall` to remove.
 
 ## Author
 Anders Damsgaard, https://src.adamsgaard.dk/scholarref
