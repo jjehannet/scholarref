@@ -27,7 +27,7 @@ show_version() {
 	echo "${0##*/} version $version"
 	echo "Licensed under the GNU Public License, v3+"
 	echo "written by Anders Damsgaard, anders@adamsgaard.dk"
-	echo "https://gitlab.com/admesg/dotfiles"
+	echo "https://src.adamsgaard.dk/scholarref"
 }
 
 die() {
