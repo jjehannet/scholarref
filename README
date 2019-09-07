@@ -1,0 +1,50 @@
+# scholarref
+
+Tools to extract, fetch, and parse DOIs and BiBTeX bibliography references.
+
+- getdoi: extracts a DOI from a file or fetches it online from a search query
+- getref: get a BiBTeX entry from a DOI and parse it
+- scholarref: combine getref and getdoi for a BiBTeX entry from a search query
+
+## Author
+Anders Damsgaard, https://src.adamsgaard.dk/scholarref
+
+## License
+GNU Public License v.3 or later. See LICENSE for details.
+
+## Usage
+
+usage: getdoi [OPTIONS] QUERY
+will attempt to get the DOI from http://api.crossref.org/works
+where QUERY can consist of publication title, author, DOI, ORCID id,
+or a PDF file. In case a file is specified, getdoi will attempt to
+extract the DOI from it.
+If no QUERY is specified, this program will expect a QUERY as stdin.
+
+OPTIONS are one or more of the following:
+   -h, --help          show this message
+   -v, --version       show version and license information
+   -V, --verbose       show verbose information
+   -t, --tor-socks     use torsocks for HTTP requests
+   -n, --notify        send result as desktop notification
+   -N, --number NUM    return NUM results (default 1)
+   -c,  --clip         paste DOI to clipboard (requires xclip)
+   -o,  --open         open DOI as url in browser
+   --                  do not consider any following args as options
+
+
+usage: getref [OPTIONS] DOI1 [DOI2 ...]
+will attempt to get a BibTeX citation from https://doi.org
+If no DOIs are specified, this program will expect DOIs as stdin.
+
+OPTIONS are one or more of the following:
+   -h, --help          show this message
+   -v, --version       show version and license information
+   -V, --verbose       show verbose information
+   -t, --tor-socks     use torsocks for HTTP requests
+   -j, --full-journal  return full journal name in citation
+   -a, --full-author   do not shorten author names
+   -n, --no-newline    suppress trailing newline but prepend with newline
+   -N, --notify        send desktop notification when complete
+   --                  do not consider any following args as options
+
