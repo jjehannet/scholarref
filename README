@@ -8,9 +8,9 @@ references. The following scripts provide the core functionality:
 - shdl: takes a DOI and fetches the corresponding pdf from sci-hub.tw
 
 The script `scholarref` is an example where `getref` and `getdoi` are
-combined to obtain a BiBTeX entry from a search query. The `articlesearch`
-script is an interactive PDF opener, reference manager, and publication
-fetcher for X11 using dmenu[0] and the scholarref tools.
+combined to obtain a BiBTeX entry from a search query or a PDF. The
+`articlesearch` script is an interactive PDF opener, reference manager,
+and publication fetcher for X11 using dmenu[0] and the above tools.
 
 ## Installation
 Use locally or run `make install` to install under `/usr/local/bin`. Run
