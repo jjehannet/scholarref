@@ -1,14 +1,16 @@
 # scholarref
 
 POSIX shell tools to extract, fetch, and parse DOIs and BiBTeX bibliography
-references.
+references. The following scripts provide the core functionality:
 
 - getdoi: takes a file or a search query and returns its DOI
 - getref: takes a DOI and returns the corresponding BiBTeX entry
 - shdl: takes a DOI and fetches the corresponding pdf from sci-hub.tw
 
 The script `scholarref` is an example where `getref` and `getdoi` are
-combined to obtain a BiBTeX entry from a search query.
+combined to obtain a BiBTeX entry from a search query. The `articlesearch`
+script is an interactive PDF opener, reference manager, and publication
+fetcher for X11 using dmenu[0] and the scholarref tools.
 
 ## Installation
 Use locally or run `make install` to install under `/usr/local/bin`. Run
@@ -71,3 +73,6 @@ OPTIONS are one or more of the following:
    -n,  --notify        send desktop notification when complete
    -o,  --open          open downloaded document when complete
    --                   do not consider any following args as options
+
+## References
+0: https://tools.suckless.org/dmenu/

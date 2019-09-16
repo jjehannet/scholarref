@@ -1,0 +1,24 @@
+#!/bin/sh
+set -e
+
+# List of directory paths that contain PDFs
+dir="$HOME/articles $HOME/books"
+
+query="$(find $dir -type f | sed "s|$HOME/||" | dmenu -i -l 10 -p "Search publications:")" || exit 1
+action="$(printf "Open\nGet DOI\nSci-Hub\nAdd reference" | dmenu -i -p "Action:")"
+
+if [ "$action" = "Open" ]; then
+	if [ -f "$HOME/$query" ]; then
+		xdg-open "$HOME/$query"
+	else
+		xdg-open "https://scholar.google.com/scholar?q=$query"
+	fi
+elif [ "$action" = "Get DOI" ]; then
+	getdoi -n -c "$query"
+elif [ "$action" = "Sci-Hub" ]; then
+	getdoi "$query" | shdl --tor-socks --notify --open
+elif [ "$action" = "Add reference" ]; then
+	scholarref --add "$query"
+else
+	notify-send --category=error "${0##*/}" "Action not understood"
+fi
