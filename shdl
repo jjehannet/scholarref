@@ -1,0 +1,164 @@
+#!/bin/sh
+set -e
+
+version=1.0
+shhost="http://sci-hub.tw"
+
+show_help() {
+    echo "usage: ${0##*/} [OPTIONS] DOI1 [DOI2...[DOI N]]"
+    echo "will fetch each DOI from $shhost"
+    echo "If no DOI is specified, this program will expect DOIs as stdin."
+    echo "The program extracts the DOI if a full doi.org URL is passed to it."
+    echo "If the PDF download fails, e.g. due to captias, a tor-browser or "
+    echo "alternatively the system default browser will open sci-hub."
+    echo
+    echo "OPTIONS are one or more of the following:"
+    echo "   -h,  --help          show this message"
+    echo "   -v,  --version       show version and license information"
+    echo "   -V,  --verbose       show verbose information"
+    echo "   -t,  --tor-socks     use torsocks for requests to sci-hub"
+    echo "   -b,  --browser       open sci-hub in browser immediately"
+    echo "   -r,  --reference     add reference to bibliography using scholarref"
+    echo "   -n,  --notify        send desktop notification when complete"
+    echo "   -o,  --open          open downloaded document when complete"
+    echo "   --                   do not consider any following args as options"
+}
+
+show_version() {
+    echo "${0##*/} version $version"
+    echo "Licensed under the GNU Public License, v3+"
+    echo "written by Anders Damsgaard, anders@adamsgaard.dk"
+    echo "https://gitlab.com/admesg/dotfiles"
+}
+
+strip_doi() {
+    sed 's/^(http:\/\/|https:\/\/)?(dx\.)?(doi\.org\/)//'
+}
+
+browser_open() {
+    echo "$1"
+    if command -v tor-browser 2>/dev/null; then
+        [ "$verbose" = 1 ] && echo "attempting to launch tor-browser"
+        tor-browser "$1"
+    elif command -v xdg-open 2>/dev/null; then
+        [ "$verbose" = 1 ] && echo "launching default browser"
+        xdg-open "$1"
+    elif command -v open 2>/dev/null; then
+        [ "$verbose" = 1 ] && echo "launching default browser"
+        open "$1"
+    else
+        die 'Error: could not open a browser'
+    fi
+}
+
+shdl_fetch() {
+    shurl="$shhost/$doi"
+    [ "$verbose" = 1 ] && echo "processing $doi"
+    [ "$verbose" = 1 ] && echo "connecting to $shurl $prefix"
+    pdfurl="$($prefix curl --connect-timeout 30 --silent "$shurl" | \
+        grep location.href | grep -o '//.*pdf' | sed 's/^/http:/')"
+    [ "$verbose" = 1 ] && echo "fetching pdf from $pdfurl"
+    if ! file="$($prefix curl --connect-timeout 30 \
+        --write-out "filename: %{filename_effective}\n" -O -L -J "$pdfurl" |\
+        grep 'filename: ' | cut -d' ' -f2)"; then
+        if [ "$verbose" = 1 ]; then
+            [ "$notify" = 1 ] && notify-send "${0##*/}" "Error: could not fetch $doi"
+            (echo "Error: could not fetch $doi PDF from $pdfurl" >&2)
+        fi
+        browser_open "$shurl"
+    else
+        echo "saved to $file"
+        if [ ! -f "$file" ] || [ "$(file "$file" | cut -d' ' -f2)" = "HTML" ]; then
+            (echo "Error: downloaded file $file is not valid. Opening browser..." >&2)
+            [ -f "$file" ] && rm "$file"
+            browser_open "$shurl"
+        elif [ "$open" = 1 ]; then
+            xdg-open "$file"
+        fi
+    fi
+}
+
+handle_doi() {
+    if [ "$browser" = 1 ]; then
+        shurl="$shhost/$1"
+        browser_open "$shurl"
+    else
+        shdl_fetch "$1"
+    fi
+    if [ "$reference" = 1 ]; then
+        if command -v getref >/dev/null 2>&1; then
+            if [ "$verbose" = 1 ]; then
+                echo "adding $1 to bibliography using getref"
+            fi
+            getref "$1" >> "$BIB"
+        else
+            die 'Error: getref not found in PATH'
+        fi
+    fi
+}
+
+die() {
+    printf '%s\n' "$1" >&2
+    exit 1
+}
+
+returnstatus=0
+prefix=""
+verbose=0
+browser=0
+reference=0
+notify=0
+open=0
+
+while :; do
+    case "$1" in
+        -h|-\?|--help)
+            show_help
+            exit 0
+            ;;
+        -v|--version)
+            show_version
+            exit 0
+            ;;
+        -V|--verbose)
+            verbose=1
+            ;;
+        -b|--browser)
+            browser=1
+            ;;
+        -t|--tor-socks)
+            prefix="torsocks"
+            ;;
+        -r|--reference)
+            reference=1
+            ;;
+        -n|--notify)
+            notify=1
+            ;;
+        -o|--open)
+            open=1
+            ;;
+        --) # end all options
+            shift
+            break
+            ;;
+        -?*)
+            die 'Error: Unknown option specified'
+            ;;
+        *)  # No more options
+            break
+    esac
+    shift
+done
+
+if [ $# -lt 1 ]; then
+    doi="$(cat)"
+    handle_doi "$doi"
+    exit 0
+else
+    for doi in "$@"; do
+        handle_doi "$doi"
+        [ "$notify" = 1 ] && notify-send "${0##*/}" "$doi complete"
+    done
+fi
+exit "$returnstatus"

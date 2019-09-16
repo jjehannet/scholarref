@@ -6,6 +6,7 @@ references.
 - getdoi: extracts a DOI from a file or fetches it online from a search query
 - getref: get a BiBTeX entry from a DOI and parse it
 - scholarref: combine getref and getdoi for a BiBTeX entry from a search query
+- shdl: fetch a pdf from a DOI through sci-hub.tw, with Tor Browser as fallback
 
 Use locally or run `make install` to install under `/usr/local/bin`. Run
 `make uninstall` to remove.
