@@ -5,7 +5,7 @@ version=1.0
 shhost="http://sci-hub.tw"
 
 show_help() {
-    echo "usage: ${0##*/} [OPTIONS] DOI1 [DOI2...[DOI N]]"
+    echo "usage: ${0##*/} [OPTIONS] [DOIs ...]"
     echo "will fetch each DOI from $shhost"
     echo "If no DOI is specified, this program will expect DOIs as stdin."
     echo "The program extracts the DOI if a full doi.org URL is passed to it."

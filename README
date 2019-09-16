@@ -54,7 +54,7 @@ OPTIONS are one or more of the following:
    -N, --notify        send desktop notification when complete
    --                  do not consider any following args as options
 
-usage: shdl [OPTIONS] DOI1 [DOI2...[DOI N]]
+usage: shdl [OPTIONS] [DOIs ...]
 will fetch each DOI from http://sci-hub.tw
 If no DOI is specified, this program will expect DOIs as stdin.
 The program extracts the DOI if a full doi.org URL is passed to it.
