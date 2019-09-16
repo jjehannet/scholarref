@@ -4,8 +4,8 @@ set -e
 # List of directory paths that contain PDFs
 dir="$HOME/articles $HOME/books"
 
-query="$(find $dir -type f | sed "s|$HOME/||" | dmenu -i -l 10 -p "Search publications:")" || exit 1
-action="$(printf "Open\nGet DOI\nSci-Hub\nAdd reference" | dmenu -i -p "Action:")"
+query="$(find $dir -type f | sed "s|$HOME/||" | dmenu_themed -i -l 10 -p "Search publications:")" || exit 1
+action="$(printf "Open\nGet DOI\nSci-Hub\nAdd reference" | dmenu_themed -i -p "Action:")"
 
 if [ "$action" = "Open" ]; then
 	if [ -f "$HOME/$query" ]; then
