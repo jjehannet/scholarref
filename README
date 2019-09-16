@@ -5,9 +5,12 @@ references.
 
 - getdoi: extracts a DOI from a file or fetches it online from a search query
 - getref: get a BiBTeX entry from a DOI and parse it
-- scholarref: combine getref and getdoi for a BiBTeX entry from a search query
 - shdl: fetch a pdf from a DOI through sci-hub.tw, with Tor Browser as fallback
 
+The script `scholarref` is an example where `getref` and `getdoi` are
+combined to obtain a BiBTeX entry from a search query.
+
+## Installation
 Use locally or run `make install` to install under `/usr/local/bin`. Run
 `make uninstall` to remove.
 
@@ -18,7 +21,6 @@ Anders Damsgaard, https://src.adamsgaard.dk/scholarref
 GNU Public License v.3 or later. See LICENSE for details.
 
 ## Usage
-
 usage: getdoi [OPTIONS] QUERY
 will attempt to get the DOI from http://api.crossref.org/works
 where QUERY can consist of publication title, author, DOI, ORCID id,
