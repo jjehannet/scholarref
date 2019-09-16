@@ -1,9 +1,13 @@
 #!/bin/sh
 
+die() {
+	printf '%s\n' "$1" >&2
+	exit 1
+}
+
 addref=0
 while :; do
 	case "$1" in
-		-
 		-a|--add)
 			addref=1
 			;;
@@ -21,6 +25,7 @@ while :; do
 done
 
 if [ "$addref" = 1 ]; then
+	[ -z "$BIB" ] && die 'BIB env variable not set, should point to .bib file'
 	getdoi "$@" | getref -n >> "$BIB"
 	key="$(grep '@.*{' "$BIB" | tail -n 1 | sed 's/.*{//;s/,$//')"
 	echo "Citation $key added to $BIB"
