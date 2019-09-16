@@ -53,3 +53,21 @@ OPTIONS are one or more of the following:
    -N, --notify        send desktop notification when complete
    --                  do not consider any following args as options
 
+
+usage: shdl [OPTIONS] DOI1 [DOI2...[DOI N]]
+will fetch each DOI from http://sci-hub.tw
+If no DOI is specified, this program will expect DOIs as stdin.
+The program extracts the DOI if a full doi.org URL is passed to it.
+If the PDF download fails, e.g. due to captias, a tor-browser or 
+alternatively the system default browser will open sci-hub.
+
+OPTIONS are one or more of the following:
+   -h,  --help          show this message
+   -v,  --version       show version and license information
+   -V,  --verbose       show verbose information
+   -t,  --tor-socks     use torsocks for requests to sci-hub
+   -b,  --browser       open sci-hub in browser immediately
+   -r,  --reference     add reference to bibliography using scholarref
+   -n,  --notify        send desktop notification when complete
+   -o,  --open          open downloaded document when complete
+   --                   do not consider any following args as options
