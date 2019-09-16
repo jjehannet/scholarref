@@ -5,7 +5,7 @@ version=1.0
 host="https://doi.org"
 
 show_help() {
-	echo "usage: ${0##*/} [OPTIONS] DOI1 [DOI2 ...]"
+	echo "usage: ${0##*/} [OPTIONS] [DOIs ...]"
 	echo "will attempt to get a BibTeX citation from $host"
 	echo "If no DOIs are specified, this program will expect DOIs as stdin."
 	echo

@@ -5,7 +5,7 @@ host="http://api.crossref.org/works"
 
 show_help() {
 	echo "usage: ${0##*/} [OPTIONS] QUERY"
-	echo "will attempt to get the DOI from $host"
+	echo "returns the publication DOI from $host"
 	echo "where QUERY can consist of publication title, author, DOI, ORCID id,"
 	echo "or a PDF file. In case a file is specified, ${0##*/} will attempt to"
 	echo "extract the DOI from it."

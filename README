@@ -3,9 +3,9 @@
 POSIX shell tools to extract, fetch, and parse DOIs and BiBTeX bibliography
 references.
 
-- getdoi: extracts a DOI from a file or fetches it online from a search query
-- getref: get a BiBTeX entry from a DOI and parse it
-- shdl: fetch a pdf from a DOI through sci-hub.tw, with Tor Browser as fallback
+- getdoi: takes a file or a search query and returns its DOI
+- getref: takes a DOI and returns the corresponding BiBTeX entry
+- shdl: takes a DOI and fetches the corresponding pdf from sci-hub.tw
 
 The script `scholarref` is an example where `getref` and `getdoi` are
 combined to obtain a BiBTeX entry from a search query.
@@ -22,7 +22,7 @@ GNU Public License v.3 or later. See LICENSE for details.
 
 ## Usage
 usage: getdoi [OPTIONS] QUERY
-will attempt to get the DOI from http://api.crossref.org/works
+returns the publication DOI from http://api.crossref.org/works
 where QUERY can consist of publication title, author, DOI, ORCID id,
 or a PDF file. In case a file is specified, getdoi will attempt to
 extract the DOI from it.
@@ -39,8 +39,7 @@ OPTIONS are one or more of the following:
    -o,  --open         open DOI as url in browser
    --                  do not consider any following args as options
 
-
-usage: getref [OPTIONS] DOI1 [DOI2 ...]
+usage: getref [OPTIONS] [DOIs ...]
 will attempt to get a BibTeX citation from https://doi.org
 If no DOIs are specified, this program will expect DOIs as stdin.
 
@@ -54,7 +53,6 @@ OPTIONS are one or more of the following:
    -n, --no-newline    suppress trailing newline but prepend with newline
    -N, --notify        send desktop notification when complete
    --                  do not consider any following args as options
-
 
 usage: shdl [OPTIONS] DOI1 [DOI2...[DOI N]]
 will fetch each DOI from http://sci-hub.tw
