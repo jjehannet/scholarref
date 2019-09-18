@@ -76,7 +76,11 @@ get_doi() {
 	if [ -e "$1" ]; then
 		doi=$(get_doi_from_file "$1")
 	else
-		doi=$(get_doi_from_crossref "$@")
+		if [ $(expr "$1" : '^10\.[0-9]\+\/.*') -gt 0 ]; then
+			doi="$1"
+		else
+			doi=$(get_doi_from_crossref "$@")
+		fi
 	fi
 	echo "$doi"
 	[ "$clip" = 1 ] && echo "https://doi.org/${doi}" | \
