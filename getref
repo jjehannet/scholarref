@@ -105,7 +105,7 @@ get_citation() {
 	result="$(echo "$result" | format_bibtex_key)"
 	[ "$fulljournal" = 0 ] && result="$(echo "$result" | abbreviate_journal_name)"
 	[ "$fullauthor" = 0 ] && result="$(echo "$result" | abbreviate_author_name)"
-	result="$(echo "$result" | grep -v '^    url' )"
+	result="$(echo "$result" | grep -v '^\turl' )"
 	if [ "$nonewline" = 1 ]; then
 		printf "\n%s" "$result"
 	else
