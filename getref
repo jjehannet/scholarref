@@ -90,7 +90,7 @@ abbreviate_journal_name() {
 }
 
 abbreviate_author_name() {
-	sed -e '/author = /{' -e 's/\([A-Z]\)[A-Za-z]* \([A-Z]\)/\1. \2/g' -e '}'
+	sed -e '/author = /{' -e 's/\([A-Z]\)[^ ]* \([A-Z]\)/\1. \2/g' -e '}'
 }
 
 strip_doi() {
