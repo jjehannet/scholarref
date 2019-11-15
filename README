@@ -12,6 +12,13 @@ combined to obtain a BiBTeX entry from a search query or a PDF. The
 `articlesearch` script is an interactive PDF opener, reference manager,
 and publication fetcher for X11 using dmenu[0] and the above tools.
 
+DISCLAIMER:
+The functionality provided by these programs depends on communication
+with third party webpages, which may or may not be permitted by law and
+the terms of service upheld by the third parties.  What is demonstrated
+here is an example only.  Use of the tools is entirely under your own
+responsibility.
+
 ## Installation
 Use locally or run `make install` to install under `/usr/local/bin`. Run
 `make uninstall` to remove.
