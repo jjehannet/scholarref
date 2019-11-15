@@ -79,6 +79,9 @@ abbreviate_journal_name() {
 	s/Methods/Meth./
 	s/Geomechanics/Geomech./
 	s/Analytical/Anal./
+	s/Advances/Adv./
+	s/Modeling/Mod./
+	s/Systems/Sys./
 	s/ for / /
 	s/ of / /
 	s/ and / /
