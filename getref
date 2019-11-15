@@ -90,7 +90,7 @@ abbreviate_journal_name() {
 }
 
 abbreviate_author_name() {
-	sed -e '/author = /{' -e 's/\([A-Z]\)[^[:space:]]* \([A-Z]\)/\1. \2/g' -e '}'
+	sed -e '/author = /{' -e 's/\([A-Z]\)[^ ]* \([A-Z]\)/\1. \2/g' -e '}'
 }
 
 strip_doi() {
@@ -101,18 +101,19 @@ get_citation() {
 	doi=$(echo "$1" | strip_doi)
 	url="$host/$1"
 	[ "$verbose" = 1 ] && echo "connecting to $url" || :
-	result=$($prefix curl --location \
+	echo "$url"
+	result="$($prefix curl --location \
 		--header "Accept: application/x-bibtex" \
-		--silent --show-error "$url")
+		--silent --show-error "$url")"
 	echo "$result" | grep -q '<html>' && die 'no result found'
-	result="$(echo "$result" | format_bibtex_key)"
-	[ "$fulljournal" = 0 ] && result="$(echo "$result" | abbreviate_journal_name)" || :
-	[ "$fullauthor" = 0 ] && result="$(echo "$result" | abbreviate_author_name)" || :
-	result="$(echo "$result" | grep -v -e 'url = ' -e 'month = ' )"
+	result="$(printf "%s\n" "$result" | format_bibtex_key)"
+	[ "$fulljournal" = 0 ] && result="$(printf "%s\n" "$result" | abbreviate_journal_name)" || :
+	[ "$fullauthor" = 0 ] && result="$(printf "%s\n" "$result" | abbreviate_author_name)" || :
+	result="$(printf "%s\n" "$result" | grep -v -e 'url = ' -e 'month = ' )"
 	if [ "$nonewline" = 1 ]; then
 		printf "\n%s" "$result"
 	else
-		echo "$result"
+		printf "%s\n" "$result"
 	fi
 	[ "$notify" = 1 ] && notify-send "${0##*/}" "added: $(echo "$result" | cut -c-80)" || :
 }
