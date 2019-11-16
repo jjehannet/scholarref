@@ -101,7 +101,6 @@ get_citation() {
 	doi=$(echo "$1" | strip_doi)
 	url="$host/$1"
 	[ "$verbose" = 1 ] && echo "connecting to $url" || :
-	echo "$url"
 	result="$($prefix curl --location \
 		--header "Accept: application/x-bibtex" \
 		--silent --show-error "$url")"
